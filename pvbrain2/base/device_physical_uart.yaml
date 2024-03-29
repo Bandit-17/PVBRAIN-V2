@@ -1,5 +1,5 @@
 
- ############# Physical UART ############    
+ ############# ESP32 S3 UART ############    
 
 uart:
   - id: uart_esp_0
