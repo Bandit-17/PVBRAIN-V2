@@ -1,0 +1,72 @@
+external_components:
+  - source: github://dackara/esphome-pylontech@official-patched
+    refresh: 0s
+
+pylontech:
+  id: id_${pylon_name}
+  uart_id: ${pylon_uart_id}
+  update_interval: ${pylon_update_interval}
+
+sensor:
+  - platform: pylontech
+    pylontech_id: id_${pylon_name}
+    battery: ${pylon_number}
+    voltage:
+      id: ${pylon_name}_${pylon_number}_tension
+      name: '${name}_${pylon_name}${pylon_number}_tension'
+    current:
+      id: ${pylon_name}_${pylon_number}_courant_charge
+      name: '${name}_${pylon_name}${pylon_number}_courant_charge'
+    coulomb:
+      id: ${pylon_name}_${pylon_number}_capacity
+      name: '${name}_${pylon_name}${pylon_number}_capacity'
+    temperature:
+      id: ${pylon_name}_${pylon_number}_temperature
+      name: '${name}_${pylon_name}${pylon_number}_temperature'
+    temperature_low:
+      id: ${pylon_name}_${pylon_number}_low_temperature
+      name: '${name}_${pylon_name}${pylon_number} low temperature'
+    temperature_high:
+      id: ${pylon_name}_${pylon_number}_high_temperature
+      name: '${name}_${pylon_name}${pylon_number} high temperature'
+    voltage_low:
+      id: ${pylon_name}_${pylon_number}_cell_low
+      name: '${name}_${pylon_name}${pylon_number}_cell_low'
+    voltage_high:
+      id: ${pylon_name}_${pylon_number}_cell_high
+      name: '${name}_${pylon_name}${pylon_number}_cell_high'  
+    mos_temperature:
+      id: ${pylon_name}_${pylon_number}_mosfet_temperature
+      name: '${name}_${pylon_name}${pylon_number}_mosfet_temperature'
+      
+text_sensor:
+  - platform: pylontech
+    pylontech_id: id_${pylon_name}
+    battery: ${pylon_number}
+    base_state:
+      id: ${pylon_name}_${pylon_number}_base_state
+      name: '${name}_${pylon_name}_${pylon_number}_base_state'
+    voltage_state:
+      id: ${pylon_name}_${pylon_number}_voltage_state
+      name: '${name}_${pylon_name}_${pylon_number}_voltage_sate'
+    current_state:
+      id: ${pylon_name}_${pylon_number}_current_state
+      name: '${name}_${pylon_name}_${pylon_number}_current_state'
+    temperature_state:
+      id: ${pylon_name}_${pylon_number}_temperature_state
+      name: '${name}_${pylon_name}_${pylon_number}_temperature_state'
+    date_state:
+      id: ${pylon_name}_${pylon_number}_date_state
+      name: '${name}_${pylon_name}_${pylon_number}_date_state'
+    time_state:
+      id: ${pylon_name}_${pylon_number}_time_state
+      name: '${name}_${pylon_name}_${pylon_number}_time_state'
+    bv_state:
+      id: ${pylon_name}_${pylon_number}_bv_state
+      name: '${name}_${pylon_name}_${pylon_number}_bv_state'
+    bt_state:
+      id: ${pylon_name}_${pylon_number}_bt_state
+      name: '${name}_${pylon_name}_${pylon_number}_bt_state'
+    mos_state:
+      id: ${pylon_name}_${pylon_number}_mos_state
+      name: '${name}_${pylon_name}_${pylon_number}_mos_state' 
