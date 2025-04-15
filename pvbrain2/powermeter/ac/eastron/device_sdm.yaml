@@ -1,0 +1,137 @@
+globals:
+  - id: ${powermeter_name}_energy_imported_yesterday_global
+    type: float
+    restore_value: yes
+    
+  - id: ${powermeter_name}_energy_exported_yesterday_global
+    type: float
+    restore_value: yes
+    
+time:
+  - platform: homeassistant #sntp
+    id: !extend my_time
+    on_time:
+      - seconds: 59
+        minutes: 59
+        hours: 23
+        then:  
+          - globals.set:
+              id: ${powermeter_name}_energy_imported_yesterday_global
+              value: !lambda return ( id(${powermeter_name}_energy_imported_yesterday_global) =  float( id(${powermeter_name}_energy_imported_today).state) );         
+          - globals.set:
+              id: ${powermeter_name}_energy_exported_yesterday_global
+              value: !lambda return ( id(${powermeter_name}_energy_exported_yesterday_global) =  float( id(${powermeter_name}_energy_exported_today).state) );          
+# modbus:
+  # - id: ${powermeter_name}_modbus
+    # uart_id: ${powermeter_uart_id}
+    # send_wait_time: ${powermeter_modbus_send_wait_time}
+     
+sensor:
+  - platform: sdm_meter
+    modbus_id: ${powermeter_modbus_id}     
+    id: ${powermeter_name}_id
+    phase_a:
+      current:
+        name: ${name}_${powermeter_name}_current
+      voltage:
+        name: ${name}_${powermeter_name}_voltage
+      active_power:
+        name: ${name}_${powermeter_name}_power
+        id: ${powermeter_name}_power
+      power_factor:
+        name: ${name}_${powermeter_name}_power_factor
+      apparent_power:
+        name: ${name}_${powermeter_name}_apparent_power
+      reactive_power:
+        name: ${name}_${powermeter_name}_reactive_power
+      phase_angle:
+        name: ${name}_${powermeter_name}_phase_angle
+    frequency:
+      name: ${name}_${powermeter_name}_frequency
+    total_power:
+      name: ${name}_${powermeter_name}_total_power
+    import_active_energy:
+      name: ${name}_${powermeter_name}_energy_imported
+    export_active_energy:
+      name: ${name}_${powermeter_name}_energy_exported
+    import_reactive_energy:
+      name: ${name}_${powermeter_name}_reactive_energy_imported
+    export_reactive_energy:
+      name: ${name}_${powermeter_name}_reactive_energy_exported
+    update_interval: ${powermeter_update_interval}
+
+  - platform: template
+    name: ${name}_${powermeter_name}_power_imported
+    id: ${powermeter_name}_power_imported
+    unit_of_measurement: 'W'
+    accuracy_decimals: 2
+    icon: mdi:power
+    update_interval: ${powermeter_template_update}
+    lambda: |-
+      if (id(${powermeter_name}_power).state > 0.0) {
+        return id(${powermeter_name}_power).state;
+      } 
+      else {
+        return 0.0;
+      }    
+    
+  - platform: total_daily_energy
+    name: ${name}_${powermeter_name}_energy_imported_today
+    id: ${powermeter_name}_energy_imported_today
+    power_id: ${powermeter_name}_power_imported
+    unit_of_measurement: 'kWh'
+    accuracy_decimals: 1
+    method: trapezoid
+    filters:
+        # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+    icon: mdi:counter    
+    
+    
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_imported_yesterday
+    id: ${powermeter_name}_energy_imported_yesterday
+    unit_of_measurement: 'kWh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${powermeter_template_update}
+    lambda: |-
+      return (id(${powermeter_name}_energy_imported_yesterday).state = id(${powermeter_name}_energy_imported_yesterday_global));
+
+  - platform: template
+    name: ${name}_${powermeter_name}_power_exported
+    id: ${powermeter_name}_power_exported
+    unit_of_measurement: 'W'
+    accuracy_decimals: 2
+    icon: mdi:power
+    update_interval: ${powermeter_template_update}
+    lambda: |-
+      if (id(${powermeter_name}_power).state <= 0.0) {
+        return id(${powermeter_name}_power).state;
+      } 
+      else {
+        return 0.0;
+      }    
+      
+  - platform: total_daily_energy
+    name: ${name}_${powermeter_name}_energy_exported_today
+    id: ${powermeter_name}_energy_exported_today
+    power_id: ${powermeter_name}_power_exported
+    unit_of_measurement: 'kWh'
+    accuracy_decimals: 1
+    method: trapezoid
+    filters:
+        # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+    icon: mdi:counter    
+      
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_exported_yesterday
+    id: ${powermeter_name}_energy_exported_yesterday
+    unit_of_measurement: 'kWh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${powermeter_template_update}
+    lambda: |-
+      return (id(${powermeter_name}_energy_exported_yesterday).state = id(${powermeter_name}_energy_exported_yesterday_global));      
+    

@@ -1,0 +1,166 @@
+# Updated : 2024.05.17
+# Version : 1.0.1
+
+globals: 
+  - id: ${powermeter_name}_energy_yesterday_global_${channel_1}
+    type: float
+    restore_value: yes
+  - id: ${powermeter_name}_energy_yesterday_global_${channel_2}
+    type: float
+    restore_value: yes
+  - id: ${powermeter_name}_energy_yesterday_global_${channel_3}
+    type: float
+    restore_value: yes
+
+time:
+  - platform: homeassistant #sntp
+    id: !extend my_time
+    on_time:
+      - seconds: 59
+        minutes: 59
+        hours: 23
+        then:  
+          - globals.set:
+              id: ${powermeter_name}_energy_yesterday_global_channel_1
+              value: !lambda return (id(${powermeter_name}_energy_yesterday_global_channel_1) = float( id(${powermeter_name}_energy_today_channel_1).state));    
+          - globals.set:
+              id: ${powermeter_name}_energy_yesterday_global_channel_2
+              value: !lambda return (id(${powermeter_name}_energy_yesterday_global_channel_2) = float( id(${powermeter_name}_energy_today_channel_2).state));
+          - globals.set:
+              id: ${powermeter_name}_energy_yesterday_global_${channel_3}
+              value: !lambda return (id(${powermeter_name}_energy_yesterday_global_${channel_3}) = float( id(${powermeter_name}_energy_today_${channel_3}).state));   
+ 
+sensor:
+  - platform: ina3221
+    address: ${powermeter_address}
+    i2c_id: ${powermeter_i2c_bus}
+    channel_1:
+      shunt_resistance: 0.1 ohm
+      current:
+        name: ${name}_${powermeter_name}_current_${channel_1}
+        id: ${powermeter_name}_current_channel_1
+      power:
+        name: ${name}_${powermeter_name}_power_${channel_1}
+        id: ${powermeter_name}_power_channel_1
+      bus_voltage:
+        name: ${name}_${powermeter_name}_bus_voltage_${channel_1}
+        id: ${powermeter_name}_bus_voltage_channel_1
+      shunt_voltage:
+        name: ${name}_${powermeter_name}_shunt_voltage_${channel_1}
+        id: ${powermeter_name}_shunt_voltage_${channel_1}
+    channel_2:
+      shunt_resistance: 0.1 ohm
+      current:
+        name: ${name}_${powermeter_name}_current_${channel_2}
+        id: ${powermeter_name}_current_${channel_2}
+      power:
+        name: ${name}_${powermeter_name}_power_${channel_2}
+        id: ${powermeter_name}_power_${channel_2}
+      bus_voltage:
+        name: ${name}_${powermeter_name}_bus_voltage_${channel_2}
+        id: ${powermeter_name}_bus_voltage_${channel_2}
+      shunt_voltage:
+        name: ${name}_${powermeter_name}_shunt_voltage_${channel_2}
+        id: ${powermeter_name}_shunt_voltage_${channel_2}
+    channel_3:
+      shunt_resistance: 0.1 ohm
+      current:
+        name: ${name}_${powermeter_name}_current_${channel_3}
+        id: ${powermeter_name}_current_${channel_3}
+      power:
+        name: ${name}_${powermeter_name}_power_${channel_3}
+        id: ${powermeter_name}_power_${channel_3}
+      bus_voltage:
+        name: ${name}_${powermeter_name}_bus_voltage_${channel_3}
+        id: ${powermeter_name}_bus_voltage_${channel_3}
+      shunt_voltage:
+        name: ${name}_${powermeter_name}_shunt_voltage_${channel_3}
+        id: ${powermeter_name}_shunt_voltage_${channel_3}
+    update_interval: ${powermeter_update_interval}
+
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_total_${channel_1}
+    id: ${powermeter_name}_energy_total_${channel_1}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    update_interval: ${powermeter_update_interval}
+    icon: mdi:power
+    lambda: return  (id(${powermeter_name}_energy_today_${channel_1}).state);
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_total_${channel_2}
+    id: ${powermeter_name}_energy_total_${channel_2}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    update_interval: ${powermeter_update_interval}
+    icon: mdi:power
+    lambda: return  (id(${powermeter_name}_energy_today_channel_2).state);
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_total_${channel_3}
+    id: ${powermeter_name}_energy_total_${channel_3}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    update_interval: ${powermeter_update_interval}
+    icon: mdi:power
+    lambda: return  (id(${powermeter_name}_energy_today_${channel_3}).state);
+    
+  - platform: total_daily_energy
+    name: ${name}_${powermeter_name}_energy_today_${channel_1}
+    id: ${powermeter_name}_energy_today_${channel_1}
+    power_id: ${powermeter_name}_power_${channel_1}
+    unit_of_measurement: 'kWh'
+    accuracy_decimals: 1
+    method: trapezoid
+    filters:
+        # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+    icon: mdi:counter
+  - platform: total_daily_energy
+    name: ${name}_${powermeter_name}_energy_today_${channel_2}
+    id: ${powermeter_name}_energy_today_${channel_2}
+    power_id: ${powermeter_name}_power_${channel_2}
+    unit_of_measurement: 'kWh'
+    accuracy_decimals: 1
+    method: trapezoid
+    filters:
+        # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+    icon: mdi:counter
+  - platform: total_daily_energy
+    name: ${name}_${powermeter_name}_energy_today_${channel_3}
+    id: ${powermeter_name}_energy_today_${channel_3}
+    power_id: ${powermeter_name}_power_${channel_3}
+    unit_of_measurement: 'kWh'
+    accuracy_decimals: 1
+    method: trapezoid
+    filters:
+        # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+    icon: mdi:counter
+    
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_yesterday_${channel_1}
+    id: ${powermeter_name}_energy_yesterday_${channel_1}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${powermeter_update_interval}
+    lambda: |-
+      return (id(${powermeter_name}_energy_yesterday_${channel_1}).state = id(${powermeter_name}_energy_yesterday_global_${channel_1}));
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_yesterday_${channel_2}
+    id: ${powermeter_name}_energy_yesterday_${channel_2}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${powermeter_update_interval}
+    lambda: |-
+      return (id(${powermeter_name}_energy_yesterday_${channel_2}).state = id(${powermeter_name}_energy_yesterday_global_${channel_2}));
+  - platform: template
+    name: ${name}_${powermeter_name}_energy_yesterday_${channel_3}
+    id: ${powermeter_name}_energy_yesterday_${channel_3}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${powermeter_update_interval}
+    lambda: |-
+      return (id(${powermeter_name}_energy_yesterday_${channel_3}).state = id(${powermeter_name}_energy_yesterday_global_${channel_3}));

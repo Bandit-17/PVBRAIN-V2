@@ -1,0 +1,73 @@
+modbus_controller:
+  - id: ${swimming_pool_pump_name}_modbus_controller
+    address: ${swimming_pool_pump_modbus_address}
+    modbus_id: ${swimming_pool_pump_modbus_id} #${solar_charger_name}_modbus
+    command_throttle: ${swimming_pool_pump_modbus_throttle}
+    setup_priority: -10
+    update_interval: ${swimming_pool_pump_update_interval}
+
+
+sensor:
+
+  - platform: modbus_controller
+    modbus_controller_id: ${swimming_pool_pump_name}_modbus_controller
+    id: ${swimming_pool_pump_name}_puissance
+    name: ${name}_${swimming_pool_pump_name}_puissance
+    address: 0x0C44
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 0
+    unit_of_measurement: "W" ## for any other unit the value is returned in minutes
+    skip_updates: 1 
+    icon: mdi:sine-wave
+    bitmask: 0x0000FFFF
+
+  - platform: modbus_controller
+    modbus_controller_id: ${swimming_pool_pump_name}_modbus_controller
+    id: ${swimming_pool_pump_name}_vitesse_actuelle
+    name: ${name}_${swimming_pool_pump_name}_vitesse_actuelle
+    address: 0x0C44
+    register_type: holding
+    value_type: U_DWORD
+    accuracy_decimals: 0
+    unit_of_measurement: 'RPM'
+    skip_updates: 1 
+    icon: mdi:pump
+    bitmask: 0xFFFF0000 #(Bits 15-8)
+
+select:
+  - platform: modbus_controller
+    modbus_controller_id: ${swimming_pool_pump_name}_modbus_controller
+    name: "Pump control"
+    address: 0x0B3E
+    value_type: U_DWORD
+    optionsmap:
+      "On": 1
+      "Off": 2
+
+number:
+
+  - platform: template         # 0x0B3C
+    name: ${name}_${swimming_pool_pump_name}_select_speed
+    id: ${swimming_pool_pump_name}_select_speed
+    unit_of_measurement: 'RPM'
+    optimistic: true
+    # icon: mdi:sine-wave
+    min_value: 750
+    max_value: 3450
+    step: 50
+    initial_value: 750
+    restore_value: true
+    mode: 'slider'
+    on_value:
+      then: 
+        - lambda: |-
+            esphome::modbus_controller::ModbusController *controller = id(${swimming_pool_pump_name}_modbus_controller);
+            std::vector<uint16_t> RPM_settings(2);
+            RPM_settings[1]  = uint16_t(  (id(${swimming_pool_pump_name}_select_speed).state)) ; 
+                    
+            esphome::modbus_controller::ModbusCommandItem   RPM_command = esphome::modbus_controller::ModbusCommandItem::create_write_multiple_command(controller, 0x0B3C,        	    RPM_settings.size() ,         RPM_settings);
+            delay(200);
+            controller->queue_command(RPM_command);
+            delay(200);
+

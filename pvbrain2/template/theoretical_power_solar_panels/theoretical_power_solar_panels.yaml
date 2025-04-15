@@ -1,0 +1,65 @@
+# Updated : 2024.09.13
+# Version : 1.0.0
+
+sensor:
+
+
+  - platform: homeassistant
+    id: weather_station_solar_radiation
+    entity_id: sensor.weather_station_solar_radiation
+    accuracy_decimals: 2
+
+  - platform: template
+    name: ${name}_axpert_rendement_panneaux
+    id:  ${name}_axpert_rendement_panneaux
+    lambda: |-
+      return id(${inverter_power_pannel}).state / ((id(weather_station_solar_radiation).state)*31.373) * 100;
+    unit_of_measurement: "%"
+    icon: mdi:percent    
+  
+  - platform: template
+    name: ${name}_axpert_puissance_potentiel_panneaux
+    id: ${name}_axpert_puissance_potentiel_panneaux
+    lambda: |-
+      return (((id(weather_station_solar_radiation).state)*20.7)*31.373) / 100;
+    unit_of_measurement: "W"
+    icon: mdi:percent   
+
+  - platform: template
+    name: ${name}_srne_rendement_panneaux
+    id: ${name}_srne_rendement_panneaux
+    lambda: |-
+      return id(${chargeur_power_pannel}).state / ((id(weather_station_solar_radiation).state)*9.805) * 100;
+    unit_of_measurement: "%"
+    icon: mdi:percent   
+
+  - platform: template
+    name: ${name}_srne_puissance_potentiel_panneaux
+    id: ${name}_srne_puissance_potentiel_panneaux
+    lambda: |-
+      return (((id(weather_station_solar_radiation).state)*21.3)*9.805) / 100;
+    unit_of_measurement: "W"
+    icon: mdi:percent   
+
+  - platform: template
+    name: ${name}_srne2_rendement_panneaux
+    id: ${name}_srne2_rendement_panneaux
+    lambda: |-
+      return id(${chargeur2_power_pannel}).state / ((id(weather_station_solar_radiation).state)*16) * 100;
+    unit_of_measurement: "%"
+    icon: mdi:percent   
+
+  - platform: template
+    name: ${name}_srne2_puissance_potentiel_panneaux
+    id: ${name}_srne2_puissance_potentiel_panneaux
+    lambda: |-
+      return (((id(weather_station_solar_radiation).state)*22.5)*16) / 100;
+    unit_of_measurement: "W"
+    icon: mdi:percent 
+
+
+
+
+
+
+  

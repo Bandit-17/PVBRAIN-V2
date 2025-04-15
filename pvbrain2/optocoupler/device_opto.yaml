@@ -1,0 +1,14 @@
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: ${opto_gpio}
+      inverted: true
+      mode: 
+        input: true
+        pullup: true
+    name: ${name}_${opto_name}
+    id: ${opto_name}
+    
+    filters:
+      # - invert:
+      - delayed_off: 100ms

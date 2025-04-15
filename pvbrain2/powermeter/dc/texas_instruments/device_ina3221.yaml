@@ -1,0 +1,150 @@
+globals: 
+  - id: ${ina3221_name}_energy_yesteday_global_${channel_1}
+    type: float
+    restore_value: yes
+  - id: ${ina3221_name}_energy_yesteday_global_${channel_2}
+    type: float
+    restore_value: yes
+  - id: ${ina3221_name}_energy_yesteday_global_${channel_3}
+    type: float
+    restore_value: yes
+
+time:
+  - platform: homeassistant #sntp
+    # id: my_time
+    on_time:
+      - seconds: 59
+        minutes: 59
+        hours: 23
+        then:  
+          - globals.set:
+              id: ${ina3221_name}_energy_yesteday_global_${channel_1}
+              value: !lambda return (id(${ina3221_name}_energy_yesteday_global_${channel_1}) = float( id(${ina3221_name}_energy_today_${channel_1}).state));    
+          - globals.set:
+              id: ${ina3221_name}_energy_yesteday_global_${channel_2}
+              value: !lambda return (id(${ina3221_name}_energy_yesteday_global_${channel_2}) = float( id(${ina3221_name}_energy_today_${channel_2}).state));
+          - globals.set:
+              id: ${ina3221_name}_energy_yesteday_global_${channel_3}
+              value: !lambda return (id(${ina3221_name}_energy_yesteday_global_${channel_3}) = float( id(${ina3221_name}_energy_today_${channel_3}).state));   
+ 
+sensor:
+  - platform: ina3221
+    address: ${ina3221_address}
+    channel_1:
+      shunt_resistance: 0.1 ohm
+      current:
+        name: ${name}_${ina3221_name}_current_${channel_1}
+      power:
+        name: ${name}_${ina3221_name}_power_${channel_1}
+        id: ${ina3221_name}_power_${channel_1}
+      bus_voltage:
+        name: ${name}_${ina3221_name}_bus_voltage_${channel_1}
+      shunt_voltage:
+        name: ${name}_${ina3221_name}_shunt_voltage_${channel_1}
+    channel_2:
+      shunt_resistance: 0.1 ohm
+      current:
+        name: ${name}_${ina3221_name}_current_${channel_2}
+      power:
+        name: ${name}_${ina3221_name}_power_${channel_2}
+        id: ${ina3221_name}_power_${channel_2}
+      bus_voltage:
+        name: ${name}_${ina3221_name}_bus_voltage_${channel_2}
+      shunt_voltage:
+        name: ${name}_${ina3221_name}_shunt_voltage_${channel_2}
+    channel_3:
+      shunt_resistance: 0.1 ohm
+      current:
+        name: ${name}_${ina3221_name}_current_${channel_3}
+      power:
+        name: ${name}_${ina3221_name}_power_${channel_3}
+        id: ${ina3221_name}_power_${channel_3}
+      bus_voltage:
+        name: ${name}_${ina3221_name}_bus_voltage_${channel_3}
+      shunt_voltage:
+        name: ${name}_${ina3221_name}_shunt_voltage_${channel_3}
+    update_interval: ${ina3221_update_interval}
+
+  - platform: template
+    name: ${name}_${ina3221_name}_energy_total_${channel_1}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    update_interval: ${ina3221_update_interval}
+    icon: mdi:power
+    lambda: return  (id(${ina3221_name}_energy_today_${channel_1}).state);
+  - platform: template
+    name: ${name}_${ina3221_name}_energy_total_${channel_2}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    update_interval: ${ina3221_update_interval}
+    icon: mdi:power
+    lambda: return  (id(${ina3221_name}_energy_today_${channel_2}).state);
+  - platform: template
+    name: ${name}_${ina3221_name}_energy_total_${channel_3}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    update_interval: ${ina3221_update_interval}
+    icon: mdi:power
+    lambda: return  (id(${ina3221_name}_energy_today_${channel_3}).state);
+    
+  - platform: total_daily_energy
+    name: ${name}_${ina3221_name}_energy_today_${channel_1}
+    id: ${ina3221_name}_energy_today_${channel_1}
+    power_id: ${ina3221_name}_power_${channel_1}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    method: trapezoid
+    # filters:
+    #     # Multiplication factor from W to kW is 0.001
+    #   - multiply: 0.001
+    icon: mdi:counter
+  - platform: total_daily_energy
+    name: ${name}_${ina3221_name}_energy_today_${channel_2}
+    id: ${ina3221_name}_energy_today_${channel_2}
+    power_id: ${ina3221_name}_power_${channel_2}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    method: trapezoid
+    # filters:
+    #     # Multiplication factor from W to kW is 0.001
+    #   - multiply: 0.001
+    icon: mdi:counter
+  - platform: total_daily_energy
+    name: ${name}_${ina3221_name}_energy_today_${channel_3}
+    id: ${ina3221_name}_energy_today_${channel_3}
+    power_id: ${ina3221_name}_power_${channel_3}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    method: trapezoid
+    # filters:
+    #     # Multiplication factor from W to kW is 0.001
+    #   - multiply: 0.001
+    icon: mdi:counter
+    
+  - platform: template
+    name: ${name}_${ina3221_name}_energy_yesteday_${channel_1}
+    id: ${ina3221_name}_energy_yesteday_${channel_1}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${ina3221_update_interval}
+    lambda: |-
+      return (id(${ina3221_name}_energy_yesteday_${channel_1}).state = id(${ina3221_name}_energy_yesteday_global_${channel_1}));
+  - platform: template
+    name: ${name}_${ina3221_name}_energy_yesteday_${channel_2}
+    id: ${ina3221_name}_energy_yesteday_${channel_2}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${ina3221_update_interval}
+    lambda: |-
+      return (id(${ina3221_name}_energy_yesteday_${channel_2}).state = id(${ina3221_name}_energy_yesteday_global_${channel_2}));
+  - platform: template
+    name: ${name}_${ina3221_name}_energy_yesteday_${channel_3}
+    id: ${ina3221_name}_energy_yesteday_${channel_3}
+    unit_of_measurement: 'Wh'
+    accuracy_decimals: 1
+    icon: mdi:power
+    update_interval: ${ina3221_update_interval}
+    lambda: |-
+      return (id(${ina3221_name}_energy_yesteday_${channel_3}).state = id(${ina3221_name}_energy_yesteday_global_${channel_3}));
